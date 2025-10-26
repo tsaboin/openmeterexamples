@@ -1,9 +1,5 @@
-export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
-
 import { OpenMeter } from '@openmeter/sdk'
 
-// Force dynamic rendering for this route
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
