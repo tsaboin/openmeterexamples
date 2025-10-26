@@ -1,7 +1,7 @@
 FROM node:18-alpine AS base
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install specific pnpm version compatible with lockfile
+RUN corepack enable && corepack prepare pnpm@9.1.0 --activate
 
 FROM base AS deps
 WORKDIR /app
