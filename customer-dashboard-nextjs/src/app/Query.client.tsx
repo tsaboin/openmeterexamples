@@ -121,7 +121,14 @@ const columns = [
         className="whitespace-nowrap text-gray-600 underline outline-none"
         dateTime={getValue()}
       >
-        {getValue()}
+        {new Date(getValue()).toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })}
       </time>
     ),
   }),
@@ -133,7 +140,14 @@ const columns = [
         className="whitespace-nowrap text-gray-600 underline outline-none"
         dateTime={getValue()}
       >
-        {getValue()}
+        {new Date(getValue()).toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })}
       </time>
     ),
   }),
