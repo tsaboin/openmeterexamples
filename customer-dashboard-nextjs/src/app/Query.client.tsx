@@ -226,7 +226,6 @@ export function OpenMeterQueryChart(params: Params) {
           scales: {
             x: {
               type: 'time',
-              distribution: 'series',
               time: {
                 unit: 'day',
               },
