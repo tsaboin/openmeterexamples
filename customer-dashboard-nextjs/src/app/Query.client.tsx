@@ -26,7 +26,7 @@ import {
 } from 'chart.js'
 import 'chartjs-adapter-luxon'
 import { Bar } from 'react-chartjs-2'
-import { useMemo } from 'react'
+import { useMemo, createContext, useContext } from 'react'
 
 ChartJS.register(
   Colors,
@@ -40,53 +40,55 @@ ChartJS.register(
 
 const queryClient = new QueryClient()
 
+// Create context for subject
+const SubjectContext = createContext<string | null>(null)
+
+// Hook to access subject from anywhere in the app
+export function useSubject() {
+  return useContext(SubjectContext)
+}
+
 export function OpenMeterQuery() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <OpenMeterPortal>
-        <div className="flex flex-col space-y-12">
-          <div className="flex-1">
-            <OpenMeterQueryChart
-              meterSlug={process.env.NEXT_PUBLIC_OPENMETER_METER_SLUG}
-              windowSize="DAY"
-            />
-          </div>
-          <OpenMeterQueryTable
-            meterSlug={process.env.NEXT_PUBLIC_OPENMETER_METER_SLUG}
-            windowSize="DAY"
-          />
-        </div>
-      </OpenMeterPortal>
-    </QueryClientProvider>
+    <div className="flex flex-col space-y-12">
+      <div className="flex-1">
+        <OpenMeterQueryChart
+          meterSlug={process.env.NEXT_PUBLIC_OPENMETER_METER_SLUG}
+          windowSize="DAY"
+        />
+      </div>
+      <OpenMeterQueryTable
+        meterSlug={process.env.NEXT_PUBLIC_OPENMETER_METER_SLUG}
+        windowSize="DAY"
+      />
+    </div>
   )
 }
 
 export function OpenMeterPortal({ children }: { children?: React.ReactNode }) {
-  // get portal token from server
-  const { data } = useQuery<{ token: string }>({
-    queryKey: ['openmeter', 'token'],
-    queryFn: async () => fetch('/api/token').then((res) => res.json()),
-    // enable token caching (optional)
-    staleTime: 12 * 60 * 60 * 1000,
-    refetchInterval: 12 * 60 * 60 * 1000,
-    // only cache token in browser
-    persister:
-      typeof window !== 'undefined'
-        ? experimental_createPersister({
-            prefix: 'openmeter',
-            storage: window.localStorage,
-            maxAge: 30 * 60 * 1000, // 30 minutes in ms
-          })
-        : undefined,
-  })
+  // get token from URL query string parameter "access_token"
+  const token = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('access_token')
+    : null
+
+  // get subject from URL query string parameter "subject" or fallback to env var
+  const subject =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('subject')
+      : null
+
+  const finalSubject =
+    subject ?? process.env.NEXT_PUBLIC_OPENMETER_SUBJECT ?? ''
 
   return (
-    <OpenMeterProvider
-      url={process.env.NEXT_PUBLIC_OPENMETER_URL}
-      token={data?.token}
-    >
-      {children}
-    </OpenMeterProvider>
+    <SubjectContext.Provider value={finalSubject}>
+      <OpenMeterProvider
+        url={process.env.NEXT_PUBLIC_OPENMETER_URL}
+        token={token ?? undefined}
+      >
+        {children}
+      </OpenMeterProvider>
+    </SubjectContext.Provider>
   )
 }
 
